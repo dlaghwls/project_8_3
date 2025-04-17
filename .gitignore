@@ -2,3 +2,6 @@
 __pycache__/
 *.pyc
 *.sqlite3
+
+# 개인용 문서 제외
+README_taebin.md
