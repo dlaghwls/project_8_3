@@ -6,8 +6,9 @@
 ├── backend/                         # Django 백엔드 루트
 │   ├── apps/                        # 기능별 모듈 앱들
 │   │   ├── accounts/                # 사용자 인증, JWT 로그인/회원가입
-│   │   ├── core/                    # 공통 모델 정의 (User, Patient 등)
-│   │   ├── patients/                # 환자 등록 및 바이탈 입력 API
+│   │   ├── core/                    # 공통 모델 정의 (User 등)
+│   │   ├── patients/                # 환자 등록 API
+│   │   ├── vitals/                  # 환자 바이탈 입력 API
 │   │   ├── messaging/               # 의사↔간호사 메시지 전송 기능
 │   │   ├── dashboard/               # 위험도 계산 + 환자 정렬 API
 │   │   └── selfcheck/               # 환자 자가 문진 결과 저장 API
