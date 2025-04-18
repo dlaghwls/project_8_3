@@ -11,7 +11,7 @@ class PatientListCreateView(generics.ListCreateAPIView):
     serializer_class = PatientSerializer
 
 # 특정 환자 조회(GET) + 수정(PUT/PATCH)하는 API
-class PatientRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+class PatientRetrieveUpdateView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
     lookup_field = 'id' # URL에서 /patients/3/ 이런 식으로 찾음
