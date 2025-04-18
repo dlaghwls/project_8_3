@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import {
   AppBar, Toolbar, Typography, IconButton, Drawer, List,
-  ListItemButton, ListItemIcon, ListItemText, Box, Badge, Avatar, Menu,
-  MenuItem, Divider, Container, CssBaseline
+  ListItemButton, ListItemIcon, ListItemText, Box, Badge, Avatar,
+  Menu, MenuItem, Divider, Container, CssBaseline
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -13,8 +13,10 @@ import {
   Notifications as NotificationsIcon,
   ExitToApp as LogoutIcon
 } from '@mui/icons-material';
+import { useAuth } from '../../store/AuthContext';
 
 const DoctorLayout = () => {
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -28,8 +30,7 @@ const DoctorLayout = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
+    logout();
     navigate('/login');
   };
 
@@ -62,14 +63,18 @@ const DoctorLayout = () => {
             </Badge>
           </IconButton>
           <IconButton onClick={handleProfileMenuOpen} color="inherit">
-            <Avatar sx={{ width: 32, height: 32, ml: 1 }}>D</Avatar>
+            <Avatar sx={{ width: 32, height: 32, ml: 1 }}>
+              {user?.name?.charAt(0) || 'D'}
+            </Avatar>
           </IconButton>
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
           >
-            <MenuItem onClick={() => navigate('/doctor/profile')}>프로필</MenuItem>
+            <MenuItem onClick={() => navigate('/doctor/profile')}>
+              <Typography>{user?.name} (의사)</Typography>
+            </MenuItem>
             <MenuItem onClick={() => navigate('/doctor/settings')}>설정</MenuItem>
             <Divider />
             <MenuItem onClick={handleLogout}>로그아웃</MenuItem>

@@ -1,23 +1,19 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 // 사용자 정보 타입 정의
 interface User {
-  username: string;
-  role: 'doctor' | 'nurse' | 'patient';
+  employeeId: string;
+  name: string;  // 이름 필드 추가
+  role: 'doctor' | 'nurse';
+  token?: string;
 }
 
 // AuthContext 타입 정의
 interface AuthContextType {
   user: User | null;
-  login: (username: string, password: string) => void;
+  login: (userData: User) => void;
   logout: () => void;
 }
-
-// 테스트용 기본값 설정
-const defaultUser: User = {
-  username: '김의사',
-  role: 'doctor'
-};
 
 // 컨텍스트 생성
 export const AuthContext = createContext<AuthContextType>({
@@ -31,24 +27,32 @@ export const useAuth = () => useContext(AuthContext);
 
 // AuthProvider 컴포넌트
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // 실제로는 null이어야 하지만, 개발 중이므로 기본값 설정
-  const [user, setUser] = useState<User | null>(defaultUser); 
+  const [user, setUser] = useState<User | null>(null);
 
-  // 로그인 함수 - 실제로는 API 호출 필요
-  const login = (username: string, password: string) => {
-    console.log('로그인 시도:', username, password);
-    // 간단한 검증 (실제로는 서버에서 검증해야 함)
-    if (password.length > 3) {
-      setUser({
-        username: username,
-        role: 'doctor'
-      });
+  // 컴포넌트 마운트 시 로컬 스토리지에서 사용자 정보 불러오기
+  useEffect(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  // 로그인 함수
+  const login = (userData: User) => {
+    setUser(userData);
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+    
+    // 토큰이 있으면 저장
+    if (userData.token) {
+      localStorage.setItem('token', userData.token);
     }
   };
 
   // 로그아웃 함수
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('token');
   };
 
   return (
