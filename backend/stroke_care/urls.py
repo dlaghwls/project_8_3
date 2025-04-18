@@ -6,5 +6,7 @@ urlpatterns = [
     path('admin/', admin.site.urls), # 관리자 페이지
     path('api/patients/', include('apps.patients.urls')), # 환자 등록
     path('api/vitals/', include('apps.vitals.urls')), # 환자 vital 입력
+    path('api/selfcheck/', include('apps.selfcheck.urls')), # 환자 자가문진
+
 ]
 

@@ -1,11 +1,17 @@
-*.env
+# 환경변수 파일
 .env*
 backend/.env
+
+# 파이썬 캐시 파일
 __pycache__/
 *.pyc
+
+# 로컬 DB
 *.sqlite3
+
+# 개인 문서
+README_taebin.md
 README.md
-.gitignore
 
 # 개인용 문서 제외
 README_taebin.md

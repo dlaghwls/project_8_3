@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class SelfcheckConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "selfcheck"
+    name = "apps.selfcheck"
