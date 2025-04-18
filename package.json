@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "frontend",
   "private": true,
   "version": "0.0.0",
@@ -9,11 +10,14 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+=======
+>>>>>>> ee4b02e (새로 생성한 파일 및 수정 파일 추가)
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
+<<<<<<< HEAD
     "axios": "^1.8.4",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
@@ -40,4 +44,23 @@
   "keywords": [],
   "author": "",
   "license": "ISC"
+=======
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "react-scripts": "^5.0.0",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "dev": "react-scripts start",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  }
+>>>>>>> ee4b02e (새로 생성한 파일 및 수정 파일 추가)
 }
