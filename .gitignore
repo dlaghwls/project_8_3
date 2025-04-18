@@ -10,8 +10,4 @@ __pycache__/
 *.sqlite3
 
 # 개인 문서
-README_taebin.md
 README.md
-
-# 개인용 문서 제외
-README_taebin.md
