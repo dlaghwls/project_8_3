@@ -4,6 +4,8 @@ backend/.env
 __pycache__/
 *.pyc
 *.sqlite3
+README.md
+.gitignore
 
 # 개인용 문서 제외
 README_taebin.md
