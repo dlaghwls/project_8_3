@@ -19,7 +19,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'apps.accounts',
     'apps.patients',
-    'apps.vitals'
+    'apps.vitals',
+    'apps.selfcheck',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -30,6 +32,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = 'stroke_care.urls'
@@ -60,4 +63,8 @@ DATABASES = {
 }
 
 STATIC_URL = '/static/'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
 
