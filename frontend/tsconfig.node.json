@@ -11,12 +11,7 @@
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
-
-    /* Project References 필수 설정 */
-    "composite": true,
-
-    /* emit은 composite일 경우 true면 안됨! */
-    "noEmit": false,
+    "noEmit": true,
 
     /* Linting */
     "strict": true,

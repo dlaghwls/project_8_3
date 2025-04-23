@@ -28,60 +28,39 @@ const DoctorDashboard = () => {
       try {
         setLoading(true);
         setError(null);
-
-        // API 요청 시도
-        try {
-          const token = localStorage.getItem('token');
-          const response = await axios.get('/api/patients/?ordering=-risk_score', {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-
-          // API 응답 구조 확인 (배열인지 체크)
-          let receivedData = response.data;
-          if (receivedData && Array.isArray(receivedData.results)) {  // REST API 페이징 처리 시
-            receivedData = receivedData.results;
-          }
-
-          if (!Array.isArray(receivedData)) {
-            throw new Error('API 응답이 올바르지 않습니다.');
-          }
-
-          setPatients(receivedData);
-          
-        } catch (apiError) {
-          console.error('API 요청 실패, 테스트 데이터 사용:', apiError);
-          // 테스트 데이터 설정 (개발용)
-          setPatients([
-            { 
-              id: 1, 
-              name: '김환자', 
-              gender: 'M', 
-              age: 65, 
-              risk_score: 85, 
-              is_checked: false, 
-              updated_at: new Date().toISOString() 
-            },
-            { 
-              id: 2, 
-              name: '이환자', 
-              gender: 'F', 
-              age: 72, 
-              risk_score: 60, 
-              is_checked: true, 
-              updated_at: new Date().toISOString() 
-            }
-          ]);
+  
+        const token = localStorage.getItem('token') || '';
+        const response = await axios.get('/api/patients/', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        console.log("📦 response.data =", response.data);
+  
+        let receivedData: any[] = [];
+  
+        if (Array.isArray(response.data)) {
+          receivedData = response.data;
+        } else if (response.data && Array.isArray(response.data.results)) {
+          receivedData = response.data.results;
+        } else {
+          console.error("예상 못한 응답 구조:", response.data);
+          throw new Error('응답이 배열이 아님');
         }
-
-      } catch (error) {
-        console.error('환자 데이터 로딩 실패:', error);
+  
+        const sorted = receivedData.sort(
+          (a: any, b: any) => b.risk_score - a.risk_score
+        );
+  
+        setPatients(sorted);
+      } catch (apiError) {
+        console.error('API 요청 실패:', apiError);
         setError('환자 데이터를 불러오는 데 실패했습니다.');
-        setPatients([]); // 빈 배열로 초기화
+        setPatients([]);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchPatients();
     const interval = setInterval(fetchPatients, 30000);
     return () => clearInterval(interval);

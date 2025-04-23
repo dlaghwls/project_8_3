@@ -1,26 +1,11 @@
-// UserList.jsx → UserList.tsx로 파일명 변경
+// frontend/src/components/messaging/UserList.jsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Typography } from '@mui/material';
 
-// 사용자 타입 정의
-export interface User {
-  id: number;
-  name: string;
-  role: 'doctor' | 'nurse';
-  employee_id: string;
-}
-
-// Props 타입 정의
-interface UserListProps {
-  onSelectUser: (user: User) => void;
-}
-
-// 컴포넌트에 타입 적용
-const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
-  // 상태에 타입 명시
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+const UserList = ({ onSelectUser }) => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const fetchUsers = async () => {
@@ -48,8 +33,8 @@ const UserList: React.FC<UserListProps> = ({ onSelectUser }) => {
         <Typography align="center">등록된 사용자가 없습니다</Typography>
       ) : (
         users.map(user => (
-          <ListItem
-            component="button"
+          <ListItem 
+            button 
             key={user.id} 
             onClick={() => onSelectUser(user)}
             alignItems="flex-start"

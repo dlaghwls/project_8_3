@@ -2,23 +2,22 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Grid from '@mui/material/GridLegacy';
-
 import {
   Container, Typography, Box, Paper, Divider,
   Card, CardHeader, CardContent, List, ListItem, ListItemText,
-  Button, TextField, Chip
+  TextField, Button, Chip
 } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 interface VitalSign {
   id: number;
-  timestamp: string;
-  sbp: number;
-  dbp: number;
-  hr: number;
-  rr: number;
-  body_temp: number;
-  spo2: number;
+  measured_at: string;
+  systolic_bp: number;
+  diastolic_bp: number;
+  pulse: number;
+  respiration_rate: number;
+  temperature: number;
+  oxygen: number;
 }
 
 interface Comment {
@@ -59,7 +58,6 @@ const PatientDetail = () => {
         setLoading(false);
       }
     };
-
     fetchPatientDetail();
   }, [id]);
 
@@ -73,7 +71,6 @@ const PatientDetail = () => {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // 코멘트 추가 후 환자 정보 다시 불러오기
       const response = await axios.get(`/api/patients/${id}/`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -115,7 +112,6 @@ const PatientDetail = () => {
       </Box>
 
       <Grid container spacing={3}>
-        {/* Vital Signs 차트 */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
@@ -125,11 +121,11 @@ const PatientDetail = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={patient.vitals.map(v => ({
-                    timestamp: new Date(v.timestamp).toLocaleString('ko-KR'),
-                    sbp: v.sbp,
-                    dbp: v.dbp,
-                    hr: v.hr,
-                    spo2: v.spo2
+                    timestamp: new Date(v.measured_at).toLocaleString('ko-KR'),
+                    sbp: v.systolic_bp,
+                    dbp: v.diastolic_bp,
+                    hr: v.pulse,
+                    spo2: v.oxygen
                   }))}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="timestamp" />
@@ -144,7 +140,7 @@ const PatientDetail = () => {
             </Box>
           </Paper>
         </Grid>
-        {/* 최신 Vital Signs */}
+
         <Grid item xs={12} md={6}>
           <Card>
             <CardHeader title="최신 Vital Signs" />
@@ -152,41 +148,26 @@ const PatientDetail = () => {
               {patient.vitals.length > 0 ? (
                 <List>
                   <ListItem>
-                    <ListItemText 
-                      primary="혈압" 
-                      secondary={`${patient.vitals[0].sbp}/${patient.vitals[0].dbp} mmHg`} 
-                    />
+                    <ListItemText primary="혈압" secondary={`${patient.vitals[0].systolic_bp}/${patient.vitals[0].diastolic_bp} mmHg`} />
                   </ListItem>
                   <Divider />
                   <ListItem>
-                    <ListItemText 
-                      primary="심박수" 
-                      secondary={`${patient.vitals[0].hr} bpm`} 
-                    />
+                    <ListItemText primary="심박수" secondary={`${patient.vitals[0].pulse} bpm`} />
                   </ListItem>
                   <Divider />
                   <ListItem>
-                    <ListItemText 
-                      primary="호흡수" 
-                      secondary={`${patient.vitals[0].rr} breaths/min`} 
-                    />
+                    <ListItemText primary="호흡수" secondary={`${patient.vitals[0].respiration_rate} breaths/min`} />
                   </ListItem>
                   <Divider />
                   <ListItem>
-                    <ListItemText 
-                      primary="체온" 
-                      secondary={`${patient.vitals[0].body_temp}°C`} 
-                    />
+                    <ListItemText primary="체온" secondary={`${patient.vitals[0].temperature}°C`} />
                   </ListItem>
                   <Divider />
                   <ListItem>
-                    <ListItemText 
-                      primary="산소포화도" 
-                      secondary={`${patient.vitals[0].spo2}%`} 
-                    />
+                    <ListItemText primary="산소포화도" secondary={`${patient.vitals[0].oxygen}%`} />
                   </ListItem>
                   <Typography variant="caption" sx={{ mt: 1, display: 'block', textAlign: 'right' }}>
-                    측정시간: {new Date(patient.vitals[0].timestamp).toLocaleString('ko-KR')}
+                    측정시간: {new Date(patient.vitals[0].measured_at).toLocaleString('ko-KR')}
                   </Typography>
                 </List>
               ) : (
@@ -195,46 +176,30 @@ const PatientDetail = () => {
             </CardContent>
           </Card>
         </Grid>
-        {/* 의사결정 가이드라인 */}
+
         <Grid item xs={12} md={6}>
           <Card>
             <CardHeader title="의사결정 가이드라인" />
             <CardContent>
-              <Typography variant="subtitle1" gutterBottom>
-                NIHSS 기반 중재 권고:
-              </Typography>
+              <Typography variant="subtitle1" gutterBottom>NIHSS 기반 중재 권고:</Typography>
               {patient.risk_score >= 80 ? (
-                <Typography color="error">
-                  <strong>즉시 중재 필요:</strong> 환자 상태가 매우 위험합니다. CT 촬영 및 신경과 협진을 즉시 의뢰하세요.
-                </Typography>
+                <Typography color="error"><strong>즉시 중재 필요:</strong> CT 촬영 및 신경과 협진을 즉시 의뢰하세요.</Typography>
               ) : patient.risk_score >= 50 ? (
-                <Typography color="warning.main">
-                  <strong>조기 중재 고려:</strong> 환자의 상태를 면밀히 모니터링하고, 뇌졸중 증상의 징후가 있는지 확인하세요.
-                </Typography>
+                <Typography color="warning.main"><strong>조기 중재 고려:</strong> 상태 면밀히 모니터링하세요.</Typography>
               ) : (
-                <Typography color="success.main">
-                  <strong>예방적 관리:</strong> 정기적인 모니터링을 유지하고 위험 요인을 확인하세요.
-                </Typography>
+                <Typography color="success.main"><strong>예방적 관리:</strong> 정기 모니터링 유지.</Typography>
               )}
               <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  권장 약물:
-                </Typography>
+                <Typography variant="subtitle1" gutterBottom>권장 약물:</Typography>
                 <List>
                   {patient.risk_score >= 70 && (
                     <ListItem>
-                      <ListItemText 
-                        primary="항혈소판제" 
-                        secondary="아스피린 100mg/일 또는 클로피도그렐 75mg/일" 
-                      />
+                      <ListItemText primary="항혈소판제" secondary="아스피린 100mg/일 또는 클로피도그렐 75mg/일" />
                     </ListItem>
                   )}
                   {patient.risk_score >= 50 && (
                     <ListItem>
-                      <ListItemText 
-                        primary="항고혈압제" 
-                        secondary="수축기 혈압 140mmHg 이하 유지" 
-                      />
+                      <ListItemText primary="항고혈압제" secondary="수축기 혈압 140mmHg 이하 유지" />
                     </ListItem>
                   )}
                 </List>
@@ -242,21 +207,25 @@ const PatientDetail = () => {
             </CardContent>
           </Card>
         </Grid>
-        {/* 코멘트 섹션 */}
+
         <Grid item xs={12}>
           <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              코멘트
-            </Typography>
+            <Typography variant="h6" gutterBottom>코멘트</Typography>
             <List>
-              {patient.comments.map(comment => (
-                <ListItem key={comment.id}>
-                  <ListItemText
-                    primary={`${comment.author_name} (${comment.author_role})`}
-                    secondary={comment.content}
-                  />
-                </ListItem>
-              ))}
+              {patient.comments && patient.comments.length > 0 ? (
+                patient.comments.map(comment => (
+                  <ListItem key={comment.id}>
+                    <ListItemText
+                      primary={`${comment.author_name} (${comment.author_role})`}
+                      secondary={comment.content}
+                    />
+                  </ListItem>
+                ))
+              ) : (
+                <Typography sx={{ ml: 2 }} color="text.secondary">
+                  등록된 코멘트가 없습니다.
+                </Typography>
+              )}
             </List>
             <TextField
               label="새 코멘트 작성"

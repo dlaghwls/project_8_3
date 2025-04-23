@@ -1,9 +1,14 @@
 import React from 'react';
+import axios from 'axios';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
-// 컴포넌트 import
+const token = localStorage.getItem('token');
+if (token) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
+
 import { AuthProvider } from './store/AuthContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import DoctorLayout from './components/layout/DoctorLayout';
@@ -51,7 +56,7 @@ const App = () => {
               <Route element={<ProtectedRoute allowedRoles={['nurse']} />}>
                 <Route element={<NurseLayout />}>
                   <Route path="/nurse" element={<NurseDashboard />} />
-                  <Route path="/nurse/vital-input" element={<VitalInput />} />
+                  <Route path="/vitals/:patientId" element={<VitalInput />} />
                   <Route path="/nurse/messages" element={<MessageCenter />} />
                 </Route>
               </Route>

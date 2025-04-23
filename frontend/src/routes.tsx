@@ -7,7 +7,6 @@ const AppRoutes = () => {
     <Routes>
       <Route path="/" element={<Navigate to="/nurse" />} />
       <Route path="/nurse" element={<NurseDashboard />} />
-      <Route path="/vital/:patientId" element={<VitalInput />} />
     </Routes>
   );
 };
