@@ -1,0 +1,33 @@
+// frontend/tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "strict": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    // 👇 추가: 프로젝트 내 선언 파일을 읽도록 typeRoots 설정
+    "typeRoots": [
+      "src/types",
+      "node_modules/@types"
+    ],
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": [
+    "src",
+    // 👇 추가: 커스텀 타입 선언 폴더 포함
+    "src/types"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
