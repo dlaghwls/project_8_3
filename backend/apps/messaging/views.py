@@ -1,48 +1,64 @@
+# backend/apps/messaging/views.py
+
 import logging
 from rest_framework import generics, filters
-from rest_framework.exceptions import ValidationError  # ✅ 추가
+from rest_framework.exceptions import ValidationError
 from .models import Message
 from .serializers import MessageSerializer
 from .services import send_fcm_to_patient
 
 logger = logging.getLogger(__name__)
 
-class MessageListCreateView(generics.ListCreateAPIView):
-    queryset = Message.objects.all().order_by('created_at')
+class MessageListCreateAPIView(generics.ListCreateAPIView):
+    """
+    GET  /api/messages/?patient=<patient_id>&since=<last_id>   → 해당 환자의 메시지 목록 조회
+    POST /api/messages/                                      → 메시지 생성
+    """
+    queryset = Message.objects.all().order_by('-created_at')
     serializer_class = MessageSerializer
-    filter_backends  = [filters.SearchFilter]
-    search_fields    = ['patient__patient_id']
+    filter_backends = [filters.SearchFilter]
+    # (검색필터는 유지해도 되고, 없어도 동작에는 영향 없습니다)
+    search_fields = ['patient__patient_id']
 
     def get_queryset(self):
         qs = super().get_queryset()
-        receiver = self.request.query_params.get('receiver')
-        since = self.request.query_params.get('since')  # ✅ 추가
+        patient = self.request.query_params.get('patient')
+        since  = self.request.query_params.get('since')
 
-        # ✅ receiver와 since에 대한 검증 및 필터 추가
         try:
-            if receiver is not None:
-                pid = int(receiver)
+            if patient is not None:
+                pid = int(patient)
                 qs = qs.filter(patient_id=pid)
             if since is not None:
                 sid = int(since)
                 qs = qs.filter(id__gt=sid)
         except ValueError:
-            raise ValidationError("receiver와 since는 정수여야 합니다.")
+            raise ValidationError("patient와 since는 정수여야 합니다.")
 
         return qs
 
     def perform_create(self, serializer):
+        # 1) 메시지 저장
         try:
             msg = serializer.save()
-        except Exception as e:
+        except Exception:
             logger.exception("🔥 메시지 저장 중 예외 발생")
             raise
 
+        # 2) FCM 푸시 알림 (인자명 content→message)
         try:
             send_fcm_to_patient(
-                patient_id=msg.patient,
-                content=msg.content,
+                patient_id=msg.patient_id,
+                message=msg.content,
                 title='간호사 메시지'
             )
-        except Exception as e:
+        except Exception:
             logger.exception("🔥 FCM 전송 중 예외 발생")
+
+
+class MessageRetrieveDestroyAPIView(generics.RetrieveDestroyAPIView):
+    """
+    DELETE /api/messages/<pk>/   → 메시지 단건 삭제
+    """
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
