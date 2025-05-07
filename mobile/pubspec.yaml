@@ -1,0 +1,13 @@
+name: stroke_care_mobile
+description: 환자용 Flutter 앱
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.1.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

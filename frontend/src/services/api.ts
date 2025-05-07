@@ -1,0 +1,74 @@
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:8000/api',
+  headers: { 'Content-Type': 'application/json' },
+});
+
+// 요청 인터셉터 - 토큰 주입
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers = config.headers ?? {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// 응답 인터셉터 - 토큰 갱신
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) throw new Error('No refresh token');
+        
+        // ✅ api 인스턴스 사용
+        const response = await api.post('/token/refresh/', { 
+          refresh: refreshToken 
+        });
+        
+        localStorage.setItem('token', response.data.access);
+        originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
+        
+        return api(originalRequest);
+      } catch (error) {
+        localStorage.clear();
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+// 자가문진 목록 조회
+export const getSelfCheckList = async (patientId?: number) => {
+  const response = await api.get('/selfcheck/', {
+    params: patientId ? { patient: patientId } : {}
+  });
+  return response.data.results || response.data; // ✅ 페이지네이션 대응
+};
+
+// 메시지 전송
+export const sendMessage = async (
+  receiverId: number,
+  selfcheckId: number,
+  content: string
+) => {
+  return api.post('/messages/', { // ✅ 올바른 엔드포인트
+    receiver: receiverId,
+    selfcheck: selfcheckId,
+    content
+  });
+};
+
+export default api;
