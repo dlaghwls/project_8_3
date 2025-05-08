@@ -32,11 +32,11 @@ urlpatterns = [
     # 로그인: /api/patients/login/
     path('login/', PatientLoginView.as_view(), name='patient-login'),
 
-    # 환자 조회/수정: /api/patients/<id>/
-    path('<int:id>/', PatientRetrieveUpdateView.as_view(), name='patient-retrieve-update'),
-
     # 환자 상세 조회 (optional additional detail): /api/patients/<pk>/
     path('<int:pk>/', PatientDetailView.as_view(), name='patient-detail'),
+
+    # 환자 조회/수정: /api/patients/<id>/
+    path('<int:id>/', PatientRetrieveUpdateView.as_view(), name='patient-retrieve-update'),
 
     # 환자 목록 생성: /api/patients/
     path('', PatientListCreateView.as_view(), name='patient-list-create'),

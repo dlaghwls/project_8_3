@@ -6,7 +6,7 @@ import numpy as np
 import pydicom
 from PIL import Image
 from django.conf import settings
-
+from pydicom.pixel_data_handlers.util import apply_modality_lut, apply_voi_lut
 # segmentation_model.py 에 build_model 함수가 정의되어 있어야 합니다.
 from .segmentation_model import build_model  
 # 원하는 전처리 함수가 있으면 여기서 import
@@ -78,3 +78,49 @@ def run_segmentation(dicom_path: str) -> str:
     mask_img.save(out_path)
 
     return str(out_path)
+
+def make_preview(dicom_path: str) -> str:
+    """
+    1) DICOM → numpy via pydicom
+    2) Modality LUT, VOI LUT (윈도우 레벨) 적용
+    3) 값을 [0,255] uint8로 변환 → PNG 저장
+    4) MEDIA_URL/previews/… 경로 반환
+    """
+    ds = pydicom.dcmread(dicom_path)
+
+    # 1) Modality LUT (HU 단위 변환) 적용 (없어도 OK)
+    arr = apply_modality_lut(ds.pixel_array, ds)
+
+    # 2) VOI LUT (Window Center/Width) 적용
+    #    DICOM에 설정된 WL/WW를 기반으로 자동 적용
+    try:
+        arr = apply_voi_lut(arr, ds)
+    except Exception:
+        # 만약 VOI LUT 태그가 없으면 수동으로 윈도우 적용
+        if hasattr(ds, 'WindowCenter') and hasattr(ds, 'WindowWidth'):
+            center = float(ds.WindowCenter[0] if isinstance(ds.WindowCenter, (list,tuple)) else ds.WindowCenter)
+            width  = float(ds.WindowWidth[0]  if isinstance(ds.WindowWidth,  (list,tuple)) else ds.WindowWidth)
+            low  = center - width/2
+            high = center + width/2
+            arr = np.clip(arr, low, high)
+        else:
+            # 기본 Brain window: WL=35, WW=80
+            low, high = 35-80/2, 35+80/2
+            arr = np.clip(arr, low, high)
+
+    # 3) 정규화 → uint8
+    arr = arr.astype(np.float32)
+    arr = (arr - arr.min()) / (arr.max() - arr.min()) * 255.0
+    img_uint8 = arr.astype(np.uint8)
+    pil = Image.fromarray(img_uint8)
+
+    # 4) 파일로 저장
+    out_dir = settings.MEDIA_ROOT / 'previews'
+    out_dir.mkdir(exist_ok=True, parents=True)
+    base = os.path.splitext(os.path.basename(dicom_path))[0]
+    fname = f"{base}_preview.png"
+    out_path = out_dir / fname
+    pil.save(out_path)
+
+    # MEDIA_URL (/media/) 아래 상대 경로 반환
+    return f"{settings.MEDIA_URL}previews/{fname}"

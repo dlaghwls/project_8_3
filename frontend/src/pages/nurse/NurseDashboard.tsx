@@ -48,33 +48,25 @@ const NurseDashboard: React.FC = () => {
   const handleCTUpload = async (patientId: number, file: File) => {
     setUploadingId(patientId);
     const formData = new FormData();
-    // 백엔드가 기대하는 필드명으로 맞춥니다
-    formData.append('dicom_file', file);
-
+    formData.append('dicom_file', file);  // 백엔드가 기대하는 필드명
+  
     try {
-     // multipart/form-data 로 Content-Type을 오버라이드합니다
-    await api.post(
-      `/patients/${patientId}/upload_ct/`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-      // Content-Type 헤더 없이 Axios가 자동 처리하도록 합니다
-      await api.post(`/patients/${patientId}/upload_ct/`, formData);
+      await api.post(
+        `/patients/${patientId}/upload_ct/`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
       setSnackbar({ open: true, message: 'CT 업로드 성공', severity: 'success' });
       // 목록 갱신
       const { data } = await api.get<Patient[]>('/patients/');
       setPatients(data);
     } catch (e: any) {
-      const errData = e.response?.data;
-      console.error('CT 업로드 실패', errData);
-      const msg =
-        errData?.dicom_file?.[0] ||
-        errData?.detail ||
-       'CT 업로드 실패';
+      console.error('CT 업로드 실패', e.response?.data);
+      const msg = e.response?.data?.dicom_file?.[0] || 'CT 업로드 실패';
       setSnackbar({ open: true, message: msg, severity: 'error' });
     } finally {
       setUploadingId(null);
