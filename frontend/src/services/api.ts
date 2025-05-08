@@ -23,27 +23,22 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token');
-        
-        // ✅ api 인스턴스 사용
-        const response = await api.post('/token/refresh/', { 
-          refresh: refreshToken 
+        const response = await axios.post('http://localhost:8000/api/token/refresh/', {
+          refresh: refreshToken,
         });
-        
-        localStorage.setItem('token', response.data.access);
-        originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
-        
+        const newAccess = response.data.access;
+        localStorage.setItem('access_token', newAccess);
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
         return api(originalRequest);
-      } catch (error) {
+      } catch (err) {
         localStorage.clear();
         window.location.href = '/login';
-        return Promise.reject(error);
+        return Promise.reject(err);
       }
     }
     return Promise.reject(error);
@@ -53,9 +48,9 @@ api.interceptors.response.use(
 // 자가문진 목록 조회
 export const getSelfCheckList = async (patientId?: number) => {
   const response = await api.get('/selfcheck/', {
-    params: patientId ? { patient: patientId } : {}
+    params: patientId ? { patient: patientId } : {},
   });
-  return response.data.results || response.data; // ✅ 페이지네이션 대응
+  return response.data.results || response.data;
 };
 
 // 메시지 전송
@@ -64,10 +59,10 @@ export const sendMessage = async (
   selfcheckId: number,
   content: string
 ) => {
-  return api.post('/messages/', { // ✅ 올바른 엔드포인트
+  return api.post('/messages/', {
     receiver: receiverId,
     selfcheck: selfcheckId,
-    content
+    content,
   });
 };
 

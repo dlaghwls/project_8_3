@@ -1,5 +1,5 @@
 # backend/stroke_care/settings.py
-
+import os
 from pathlib import Path
 from decouple import config
 
@@ -147,3 +147,6 @@ MEDIA_URL = '/media/'
 
 # 실제 파일이 저장될 디렉터리
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# 모델 pth 파일 
+MODEL_PATH = BASE_DIR / 'apps' / 'patients' / 'm1' / 'A_1.pth'

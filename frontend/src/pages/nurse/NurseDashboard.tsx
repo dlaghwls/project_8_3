@@ -48,20 +48,34 @@ const NurseDashboard: React.FC = () => {
   const handleCTUpload = async (patientId: number, file: File) => {
     setUploadingId(patientId);
     const formData = new FormData();
-    formData.append('ct_image', file);
+    // 백엔드가 기대하는 필드명으로 맞춥니다
+    formData.append('dicom_file', file);
 
     try {
-      await api.post(
-        `/patients/${patientId}/upload_ct/`,  // 백엔드 엔드포인트에 맞게 조정하세요
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }
-      );
+     // multipart/form-data 로 Content-Type을 오버라이드합니다
+    await api.post(
+      `/patients/${patientId}/upload_ct/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+      // Content-Type 헤더 없이 Axios가 자동 처리하도록 합니다
+      await api.post(`/patients/${patientId}/upload_ct/`, formData);
       setSnackbar({ open: true, message: 'CT 업로드 성공', severity: 'success' });
+      // 목록 갱신
+      const { data } = await api.get<Patient[]>('/patients/');
+      setPatients(data);
     } catch (e: any) {
-      console.error(e);
-      setSnackbar({ open: true, message: 'CT 업로드 실패', severity: 'error' });
+      const errData = e.response?.data;
+      console.error('CT 업로드 실패', errData);
+      const msg =
+        errData?.dicom_file?.[0] ||
+        errData?.detail ||
+       'CT 업로드 실패';
+      setSnackbar({ open: true, message: msg, severity: 'error' });
     } finally {
       setUploadingId(null);
     }
@@ -69,7 +83,6 @@ const NurseDashboard: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, px: 2 }}>
-      {/* 1) 헤더와 등록 버튼 */}
       <Box
         sx={{
           display: 'flex',
@@ -90,7 +103,6 @@ const NurseDashboard: React.FC = () => {
         </Typography>
       )}
 
-      {/* 2) 환자 카드 리스트 */}
       {patients.length === 0 ? (
         <Typography align="center" sx={{ mt: 4 }}>
           등록된 환자가 없습니다.
@@ -126,22 +138,22 @@ const NurseDashboard: React.FC = () => {
                 바이탈 입력
               </Button>
 
-              {/* CT 업로드 버튼 & 파일 input */}
               <Button
                 variant="outlined"
                 component="label"
                 disabled={uploadingId === p.id}
-                startIcon={uploadingId === p.id ? <CircularProgress size={16} /> : undefined}
+                startIcon={
+                  uploadingId === p.id ? <CircularProgress size={16} /> : undefined
+                }
               >
                 {uploadingId === p.id ? '업로드 중...' : 'CT 업로드'}
                 <input
                   type="file"
                   hidden
-                  accept=".dcm,image/*"
+                  accept=".dcm"
                   onChange={(e) => {
-                    if (e.target.files && e.target.files[0]) {
-                      handleCTUpload(p.id, e.target.files[0]);
-                    }
+                    const f = e.target.files?.[0];
+                    if (f) handleCTUpload(p.id, f);
                   }}
                 />
               </Button>
@@ -150,7 +162,6 @@ const NurseDashboard: React.FC = () => {
         ))
       )}
 
-      {/* 3) 환자 등록 FAB */}
       <Fab
         color="primary"
         onClick={() => navigate('/nurse/register')}
@@ -159,7 +170,6 @@ const NurseDashboard: React.FC = () => {
         <AddIcon />
       </Fab>
 
-      {/* 업로드 성공·실패 알림 */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

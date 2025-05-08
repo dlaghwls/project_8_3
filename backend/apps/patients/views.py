@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
 from rest_framework.views import APIView
@@ -12,7 +13,8 @@ from rest_framework.generics import RetrieveAPIView
 from django.shortcuts import get_object_or_404
 from apps.vitals.models import Vital
 from .serializers import VitalSignSerializer
-
+from .m1.utils import run_segmentation
+from rest_framework.parsers import MultiPartParser, FormParser 
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -95,19 +97,24 @@ class PatientLoginView(APIView):
 class CTUploadView(APIView):
     """
     POST /api/patients/{patient_id}/upload_ct/
-    multipart/form-data 로 dicom_file 필드를 받아 CTScan 생성
+    DICOM 파일을 업로드해서 CTScan 레코드를 생성합니다.
     """
-    def post(self, request, patient_id):
-        try:
-            patient = Patient.objects.get(pk=patient_id)
-        except Patient.DoesNotExist:
-            return Response({'detail': '환자를 찾을 수 없습니다.'}, status=status.HTTP_404_NOT_FOUND)
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request, patient_id):
+        # 1) patient 인스턴스 가져오기
+        patient = get_object_or_404(Patient, pk=patient_id)
+
+        # 2) serializer로 검증 (request.data 안에 'dicom_file'이 있어야 합니다)
         serializer = CTScanUploadSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(patient=patient)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not serializer.is_valid():
+            # 에러 내용을 바로 클라이언트에 리턴
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3) 저장 (patient를 전달)
+        serializer.save(patient=patient)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 class CTScanListView(APIView):
     def get(self, request, patient_id):
@@ -147,3 +154,11 @@ class VitalSignListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         patient = get_object_or_404(Patient, pk=self.kwargs['patient_id'])
         serializer.save(patient=patient)
+
+class CTSegmentView(APIView):
+    def post(self, request, patient_id, scan_id):
+        scan = get_object_or_404(CTScan, pk=scan_id, patient__pk=patient_id)
+        full_path = run_segmentation(scan.dicom_file.path)
+        # 파일시스템 경로 → 클라이언트가 접근할 URL
+        rel_url = full_path.replace(str(settings.MEDIA_ROOT), settings.MEDIA_URL)
+        return Response({'segmented_url': rel_url}, status=status.HTTP_200_OK)
