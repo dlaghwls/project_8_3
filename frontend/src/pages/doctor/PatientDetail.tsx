@@ -36,7 +36,8 @@ interface CTScan {
   id: number;
   dicom_file: string;
   uploaded_at: string;
-  preview_url: string;  
+  preview_url: string;
+  study_uid: string;
 }
 
 interface VitalSign {
@@ -385,7 +386,7 @@ const PatientDetail = () => {
                   color="primary"
                   onClick={() => {
       // 일단 임시로 메인 Viewer 열기 (UID 필요 시 여기 수정)
-                    const viewerUrl = 'http://34.170.61.238:3000/viewer';
+                    const viewerUrl = `http://34.170.61.238:3000/viewer/study/${scan.study_uid}`;
                     window.open(viewerUrl, '_blank');
                   }}
                 >

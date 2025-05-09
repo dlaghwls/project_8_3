@@ -57,3 +57,14 @@ class CTScan(models.Model):
     )
     dicom_file = models.FileField(upload_to='ct_scans/%Y/%m/%d/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    study_uid = models.CharField(max_length=128, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.dicom_file and not self.study_uid:
+            try:
+                dicom_path = self.dicom_file.path
+                ds = pydicom.dcmread(dicom_path)
+                self.study_uid = ds.StudyInstanceUID
+            except Exception as e:
+                print(f"[DICOM UID 추출 오류] {e}")
+        super().save(*args, **kwargs)
