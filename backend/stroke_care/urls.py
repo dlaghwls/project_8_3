@@ -17,8 +17,9 @@ urlpatterns = [
     path('api/users/login/',   LoginView.as_view(), name='login'),
     path('api/users/register/', SignupView.as_view(), name='register'),
     path('api/patients/', include('apps.patients.urls')),
+    path("pacs/", include("apps.pacs.urls")),
 
-    # ✅ 프론트 요청에 맞춘 직접 경로 추가!
+    # 프론트 요청에 맞춘 직접 경로 추가!
     path('api/register/', SignupView.as_view(), name='register'),
     path('api/users/me/',       MeView.as_view(),     name='me'),
     

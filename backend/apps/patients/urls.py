@@ -1,4 +1,6 @@
 # apps/patients/urls.py
+from django.conf import settings
+from django.conf.urls.static import static
 
 from django.urls import path
 from .views import (
@@ -41,3 +43,9 @@ urlpatterns = [
     # 환자 목록 생성: /api/patients/
     path('', PatientListCreateView.as_view(), name='patient-list-create'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,        # 예: '/media/'
+        document_root=settings.MEDIA_ROOT  # 예: BASE_DIR/'media'
+    )

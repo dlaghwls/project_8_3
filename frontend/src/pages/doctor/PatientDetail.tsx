@@ -379,6 +379,18 @@ const PatientDetail = () => {
                 >
                   분할
                 </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+      // 일단 임시로 메인 Viewer 열기 (UID 필요 시 여기 수정)
+                    const viewerUrl = 'http://34.170.61.238:3000/viewer';
+                    window.open(viewerUrl, '_blank');
+                  }}
+                >
+                  OHIF 뷰어
+                </Button>
               </Box>
             </Box>
           </ListItem>
@@ -435,38 +447,52 @@ const PatientDetail = () => {
       {/* 세그멘테이션 결과 모달 */}
       {/* Segmentation 결과 모달 */}
       <Dialog open={modalOpen} onClose={() => setModalOpen(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>Segmentation 결과</DialogTitle>
-        <DialogContent dividers>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography>원본</Typography>
-              {/* 2. 여기를 아래 코드로 교체 */}
-              {origUrl && (
-                <img
-                  src={origUrl.startsWith("http") ? origUrl : `${BACKEND}${origUrl}`}
-                  alt="원본 CT"
-                  style={{ maxWidth: '400px' }}
-                />
-              )}
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography>분할 결과</Typography>
-              {segmentUrl ? (
-                <img
-                  src={segmentUrl!.startsWith("http") ? segmentUrl! : `${BACKEND}${segmentUrl!}`}
-                  alt="분할 결과"
-                  style={{ maxWidth: '400px' }}
-                />
-              ) : (
-                <Typography color="error">로딩 중이거나 실패했습니다.</Typography>
-              )}
-            </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setModalOpen(false)}>닫기</Button>
-        </DialogActions>
-      </Dialog>
+  <DialogTitle>Segmentation 결과</DialogTitle>
+  <DialogContent dividers>
+    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+      {/* ── 원본 ── */}
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography>원본</Typography>
+        {origUrl && (
+          <img
+            src={origUrl.startsWith("http") ? origUrl : `${BACKEND}${origUrl}`}
+            alt="원본 CT"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              height: 'auto',
+              objectFit: 'contain',
+              backgroundColor: '#000'
+            }}
+          />
+        )}
+      </Box>
+
+      {/* ── 분할 결과 ── */}
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography>분할 결과</Typography>
+        {segmentUrl ? (
+          <img
+            src={segmentUrl.startsWith("http") ? segmentUrl : `${BACKEND}${segmentUrl}`}
+            alt="분할 결과"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              height: 'auto',
+              objectFit: 'contain'
+            }}
+          />
+        ) : (
+          <Typography color="error">로딩 중이거나 실패했습니다.</Typography>
+        )}
+      </Box>
+    </Box>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setModalOpen(false)}>닫기</Button>
+  </DialogActions>
+</Dialog>
+
     </Container>
   );
 };

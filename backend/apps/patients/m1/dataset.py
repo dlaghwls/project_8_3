@@ -1,4 +1,4 @@
-from .ml.preprocessing import preprocess_dicom
+from .preprocessing import preprocess_dicom
 import torch
 import numpy as np
 from torch.utils.data import Dataset
@@ -27,3 +27,4 @@ class CTDicomDataset(Dataset):
             return x, y
 
         return x  # 추론용: 마스크 없음
+

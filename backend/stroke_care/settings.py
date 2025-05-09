@@ -150,3 +150,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # 모델 pth 파일 
 MODEL_PATH = BASE_DIR / 'apps' / 'patients' / 'm1' / 'A_1.pth'
+
+# ─── Orthanc PACS 연동 설정 ────────────────────────────────────────────────
+ORTHANC_URL = config("ORTHANC_URL", default="http://<GCP_IP>:8042")
+ORTHANC_USER = config("ORTHANC_USER", default="admin")
+ORTHANC_PASS = config("ORTHANC_PASS", default="1234")

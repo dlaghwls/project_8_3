@@ -158,7 +158,13 @@ class VitalSignListCreateView(generics.ListCreateAPIView):
 class CTSegmentView(APIView):
     def post(self, request, patient_id, scan_id):
         scan = get_object_or_404(CTScan, pk=scan_id, patient__pk=patient_id)
+        # 1) 모델 세그멘테이션 & 파일 시스템 경로 얻기
         full_path = run_segmentation(scan.dicom_file.path)
-        # 파일시스템 경로 → 클라이언트가 접근할 URL
-        rel_url = full_path.replace(str(settings.MEDIA_ROOT), settings.MEDIA_URL)
+
+        # 2) media 루트 아래 상대 경로만 추출
+        from pathlib import Path
+        rel_path = Path(full_path).relative_to(settings.MEDIA_ROOT)
+
+        # 3) URL 생성: '/media' + '/segmented/xxx_mask.png'
+        rel_url = f"{settings.MEDIA_URL.rstrip('/')}/{rel_path.as_posix()}"
         return Response({'segmented_url': rel_url}, status=status.HTTP_200_OK)
