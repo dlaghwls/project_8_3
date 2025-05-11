@@ -1,5 +1,4 @@
 // src/components/messaging/MessageCenter.tsx
-
 import React, { useEffect, useState, useMemo } from 'react';
 import api from '../../services/api';
 import { useAuth } from '../../store/AuthContext';
@@ -7,7 +6,7 @@ import {
   Box, Typography, List, ListItemButton, ListItemText,
   ListItemAvatar, Avatar, Fab, Dialog, DialogTitle,
   DialogContent, DialogActions, Button, TextField,
-  ToggleButton, ToggleButtonGroup
+  ToggleButton, ToggleButtonGroup, Paper, Container
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SendIcon from '@mui/icons-material/Send';
@@ -94,83 +93,171 @@ const MessageCenter: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 2, position: 'relative' }}>
-      {/* 필터 */}
-      <ToggleButtonGroup
-        value={filterMode}
-        exclusive
-        onChange={(_, v) => v && setFilterMode(v)}
-        sx={{ mb: 2 }}
+    <Box 
+      sx={{ 
+        // position: 'fixed', // 'relative'에서 'fixed'로 변경
+        // top: 0,
+        // left: 0,
+        // width: '100vw', // 전체 뷰포트 너비
+        // height: '100vh', // 전체 뷰포트 높이
+        // display: 'flex', // flexbox 활성화
+        // justifyContent: 'center', // 가로 중앙 정렬
+        // alignItems: 'center', // 세로 중앙 정렬
+        // overflow: 'auto', // 내용이 넘칠 경우 스크롤 허용
+        '&::before': {
+          content: '""',
+          position: 'fixed', // 'absolute'에서 'fixed'로 변경
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: 'blur(8px)',
+          opacity: 0.7, // 약간 더 진하게
+          zIndex: -1
+        }
+      }}
+    >
+      <Container 
+        maxWidth="md" 
+        sx={{ 
+          py: 4,
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center', // 세로 중앙 정렬 추가
+        }}
       >
-        <ToggleButton value="all">전체</ToggleButton>
-        <ToggleButton value="inbox">받은 메시지</ToggleButton>
-        <ToggleButton value="sent">보낸 메시지</ToggleButton>
-      </ToggleButtonGroup>
+        {/* 필터 부분 (중앙 정렬) */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3, width: '100%' }}>
+          <ToggleButtonGroup
+            value={filterMode}
+            exclusive
+            onChange={(_, v) => v && setFilterMode(v)}
+            sx={{ 
+              bgcolor: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: 2,
+              boxShadow: 1
+            }}
+          >
+            <ToggleButton value="all">전체</ToggleButton>
+            <ToggleButton value="inbox">받은 메시지</ToggleButton>
+            <ToggleButton value="sent">보낸 메시지</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
 
-      {/* 리스트 */}
-      {loading && <Typography>로딩 중…</Typography>}
-      {error   && <Typography color="error">{error}</Typography>}
-      {!loading && !error && (
-        <List>
-          {filtered.map(msg => {
-            const isSent = msg.sender_id === currentUserId;
-
-            // 보낼 때 표시할 상대
-            const other = isSent
-              ? recipientMap[msg.receiver_id]
-              : recipientMap[msg.sender_id];
-
-            // “이름 (등록번호)” 혹은 알 수 없으면 fallback
-            const otherLabel = other
-              ? `${other.name} (${other.employee_id})`
-              : '알 수 없음';
-
-            // primary text 결정
-            const primaryText = isSent
-              ? `나 → ${otherLabel}`
-              : `${msg.sender_name} → 나`;
-
-            return (
-              <ListItemButton key={msg.id}>
-                <ListItemAvatar>
-                  <Avatar>
-                    {isSent
-                      ? (other?.name.charAt(0) ?? '?')
-                      : msg.sender_name.charAt(0)}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body1">
-                        {primaryText}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {new Date(msg.created_at).toLocaleString('ko-KR')}
-                      </Typography>
-                    </Box>
-                  }
-                  secondary={msg.content}
-                />
-              </ListItemButton>
-            );
-          })}
-
-          {filtered.length === 0 && (
-            <Typography align="center" sx={{ py: 3 }}>
-              {filterMode === 'all'   && '메시지가 없습니다.'}
-              {filterMode === 'inbox' && '받은 메시지가 없습니다.'}
-              {filterMode === 'sent'  && '보낸 메시지가 없습니다.'}
-            </Typography>
+        {/* 메시지 리스트 (중앙 정렬, 크기 확대) */}
+        <Paper
+          elevation={3}
+          sx={{ 
+            bgcolor: 'rgba(255, 255, 255, 0.95)', // 투명도 조정
+            borderRadius: 3,
+            overflow: 'hidden',
+            mb: 3,
+            width: '100%', // 가능한 전체 너비
+            maxWidth: '800px', // 최대 너비 제한
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)' // 그림자 강화
+          }}
+        >
+          {loading && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography>로딩 중...</Typography>
+            </Box>
           )}
-        </List>
-      )}
+          
+          {error && (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography color="error">{error}</Typography>
+            </Box>
+          )}
+          
+          {!loading && !error && (
+            <List sx={{ p: 0 }}>
+              {filtered.map(msg => {
+                const isSent = msg.sender_id === currentUserId;
+                const other = isSent
+                  ? recipientMap[msg.receiver_id]
+                  : recipientMap[msg.sender_id];
+                const otherLabel = other
+                  ? `${other.name} (${other.employee_id})`
+                  : '알 수 없음';
+                const primaryText = isSent
+                  ? `나 → ${otherLabel}`
+                  : `${msg.sender_name} → 나`;
+
+                return (
+                  <ListItemButton 
+                    key={msg.id}
+                    sx={{ 
+                      p: 2.5,
+                      borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+                      transition: 'all 0.2s',
+                      '&:hover': {
+                        bgcolor: 'rgba(25, 118, 210, 0.08)'
+                      }
+                    }}
+                  >
+                    <ListItemAvatar>
+                      <Avatar sx={{ width: 48, height: 48, mr: 1 }}>
+                        {isSent
+                          ? (other?.name.charAt(0) ?? '?')
+                          : msg.sender_name.charAt(0)}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                          <Typography variant="subtitle1" fontWeight="500">
+                            {primaryText}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(msg.created_at).toLocaleString('ko-KR')}
+                          </Typography>
+                        </Box>
+                      }
+                      secondary={
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            whiteSpace: 'pre-wrap',
+                            color: 'text.primary'
+                          }}
+                        >
+                          {msg.content}
+                        </Typography>
+                      }
+                    />
+                  </ListItemButton>
+                );
+              })}
+
+              {filtered.length === 0 && (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography>
+                    {filterMode === 'all'   && '메시지가 없습니다.'}
+                    {filterMode === 'inbox' && '받은 메시지가 없습니다.'}
+                    {filterMode === 'sent'  && '보낸 메시지가 없습니다.'}
+                  </Typography>
+                </Box>
+              )}
+            </List>
+          )}
+        </Paper>
+      </Container>
 
       {/* 새 메시지 버튼 */}
       <Fab
         color="primary"
         onClick={() => setComposeOpen(true)}
-        sx={{ position: 'fixed', bottom: 24, right: 24 }}
+        sx={{ 
+          position: 'fixed', 
+          bottom: 24, 
+          right: 24,
+          boxShadow: 3
+        }}
       >
         <AddIcon />
       </Fab>

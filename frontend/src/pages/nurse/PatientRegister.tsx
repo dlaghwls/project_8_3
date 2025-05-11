@@ -49,7 +49,7 @@ const PatientRegister: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 600, mx: 'auto', mt: 4, backgroundImage: 'none',  backgroundColor: 'white' }}>
       <Paper sx={{ p: 4 }}>
         <Typography variant="h5" gutterBottom>
           환자 등록

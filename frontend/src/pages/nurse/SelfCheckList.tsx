@@ -89,7 +89,7 @@ const SelfCheckList: React.FC = () => {
   }
 
   return (
-    <Box p={2}>
+    <Box sx={{ maxWidth: 1000, mx: 'auto', mt: 4, backgroundImage: 'none',  backgroundColor: 'white' }}>
       <Typography variant="h5" gutterBottom>
         {pidFromUrl
           ? `${data[0]?.patient_name || data[0]?.patient}번 환자 문진 기록`

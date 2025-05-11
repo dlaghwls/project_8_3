@@ -1,0 +1,463 @@
+/* src/pages/landing/LandingPage.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #333;
+  line-height: 1.6;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+.landing-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw; /* 뷰포트 너비를 사용하여 화면 가득 채우기 */
+  min-height: 100vh;
+  background-color: #121212;
+  overflow-x: hidden; /* 수평 스크롤 방지 */
+  position: relative; /* 자식 요소의 절대 위치 기준점 */
+}
+
+/* Header styles */
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 50px;
+  background-color: #121212;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  position: sticky; /* 스크롤 시 상단에 고정 */
+  top: 0;
+  z-index: 100;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  margin-right: 10px;
+  object-fit: contain; /* 이미지 비율 유지 */
+}
+
+.logo-text {
+  color: white;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.main-nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  gap: 40px;
+}
+
+.nav-item {
+  margin: 0;
+}
+
+.nav-item a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px; /* 폰트 크기 증가 */
+  font-weight: 500; /* 폰트 두께 증가 */
+  transition: color 0.3s, border-bottom 0.3s;
+  padding-bottom: 5px;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-item a:hover, .nav-item a.active {
+  color: #64b5f6;
+  border-bottom: 2px solid #64b5f6;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.login-button, .join-button {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.login-button:hover, .join-button:hover {
+  background-color: #777;
+}
+
+/* Main content styles */
+.landing-main {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero section */
+.hero-section {
+  position: relative;
+  height: 500px;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 80px;
+}
+
+.hero-content {
+  max-width: 50%;
+}
+
+.tagline {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.hero-title {
+  font-size: 42px;
+  font-weight: 300;
+  line-height: 1.3;
+  color: white;
+}
+
+.highlight {
+  font-weight: 700;
+}
+
+.slide-dots {
+  position: absolute;
+  bottom: 30px;
+  left: 80px;
+  display: flex;
+  gap: 10px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: white;
+}
+
+/* Grid layout */
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 20px;
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box; /* 패딩을 너비에 포함 */
+}
+
+/* System introduction (Doctor intro) */
+.doctor-intro {
+  grid-column: 3;
+  grid-row: 1;
+  background-color: white;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.doctor-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.doctor-info {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.doctor-name {
+  margin-top: 15px;
+  font-size: 16px;
+}
+
+.doctor-name-value {
+  font-weight: 700;
+}
+
+.doctor-image {
+  flex: 1;
+  text-align: right;
+}
+
+.doctor-image img {
+  height: 200px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Medical services */
+.medical-services {
+  grid-column: 2;
+  grid-row: 1;
+  background-color: white;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.service-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 1px solid #f0f0f0;
+}
+
+.service-item img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 5px;
+  object-fit: contain;
+}
+
+.service-item p {
+  font-size: 14px;
+  margin-top: 5px;
+  color: #333;
+}
+
+.consult-button-container {
+  padding: 15px;
+  background-color: #6e9ecb;
+  text-align: right;
+}
+
+.consult-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Gallery section */
+.gallery-section {
+  grid-column: 1 / 3;
+  grid-row: 2;
+  background-color: white;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.gallery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.gallery-title {
+  font-size: 22px;
+  color: #333;
+}
+
+.view-more {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.gallery-images {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.gallery-image {
+  width: calc(40% - 7.5px);
+  height: 130px;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+/* Location section (previously contact section) */
+.location-section {
+  grid-column: 3;
+  grid-row: 2;
+  background-color: #6e9ecb;
+  color: white;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.location-map {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 20px;
+  width: 100%;
+  height: 100%;
+}
+
+.location-map img {
+  width: 300px;
+  height: 300px;
+  margin-right: 10px;
+  object-fit: contain;
+}
+
+.location-text {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Footer */
+.landing-footer {
+  background-color: #121212;
+  color: #777;
+  text-align: center;
+  padding: 15px 0;
+  font-size: 14px;
+  width: 100%;
+}
+
+/* 전체 화면 너비에 맞게 조정 */
+@media (max-width: 1200px) {
+  .content-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .doctor-intro {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  
+  .medical-services {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .gallery-section {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .location-section {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .landing-header {
+    flex-direction: column;
+    padding: 15px;
+  }
+  
+  .main-nav {
+    margin: 15px 0;
+  }
+  
+  .nav-list {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .nav-item {
+    margin: 5px 10px;
+  }
+  
+  .hero-section {
+    padding: 0 20px;
+  }
+  
+  .hero-content {
+    max-width: 100%;
+  }
+  
+  .slide-dots {
+    left: 20px;
+  }
+  
+  .content-grid {
+    grid-template-columns: 1fr;
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .doctor-intro,
+  .medical-services,
+  .gallery-section,
+  .location-section {
+    grid-column: 1;
+  }
+  
+  .doctor-intro {
+    grid-row: 1;
+  }
+  
+  .medical-services {
+    grid-row: 2;
+  }
+  
+  .gallery-section {
+    grid-row: 3;
+  }
+  
+  .location-section {
+    grid-row: 4;
+  }
+}

@@ -1,18 +1,11 @@
+// src/pages/auth/SignupPage.tsx
+
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import {
-  Container,
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-  FormControl,
-  FormHelperText
-} from '@mui/material';
 import axios from 'axios';
+import './AuthPages.css';
 
-const SignupPage = () => {
+const SignupPage: React.FC = () => {
   const [employeeId, setEmployeeId] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -26,8 +19,7 @@ const SignupPage = () => {
     if (!employeeId) {
       newErrors.employeeId = '사원번호를 입력해주세요';
     } else if (!employeeId.match(/^(DOC|NUR)-\d{4,}/)) {
-      newErrors.employeeId =
-        '사원번호는 DOC- 또는 NUR-로 시작해야 합니다 (예: DOC-1234)';
+      newErrors.employeeId = 'DOC- 또는 NUR- 형식이어야 합니다 (예: DOC-1234)';
     }
 
     if (!name.trim()) {
@@ -50,7 +42,6 @@ const SignupPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     try {
@@ -63,107 +54,104 @@ const SignupPage = () => {
           employee_id: employeeId,
           name,
           password,
-          role
+          role,
         },
         {
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Content-Type': 'application/json' },
         }
       );
-      alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
+
+      alert('회원가입이 완료되었습니다.');
       navigate('/login');
     } catch (error) {
       console.error('회원가입 실패:', error);
-      alert('회원가입에 실패했습니다. 다시 시도해주세요.');
+      alert('회원가입에 실패했습니다.');
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Box
-        sx={{
-          mt: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center'
-        }}
-      >
-        <Paper sx={{ p: 4, width: '100%' }}>
-          <Typography variant="h4" component="h1" align="center" gutterBottom>
-            StrokeCare+ 회원가입
-          </Typography>
+    <div className="auth-container">
+      <header className="auth-header">
+        <div className="logo-container" onClick={() => navigate('/')}>
+          <img src="/assets/images/logo.png" alt="StrokeCare+ Logo" className="logo" />
+          <h1 className="logo-text">StrokeCare+ 회원가입</h1>
+        </div>
+      </header>
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="employeeId"
-              label="사원번호"
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="DOC-1234 또는 NUR-5678 형식"
-              error={!!errors.employeeId}
-              helperText={errors.employeeId}
-            />
+      <main className="auth-main">
+        <div className="auth-card">
+          <form className="auth-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="employeeId" className="required">사원번호</label>
+              <input
+                type="text"
+                id="employeeId"
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                placeholder="DOC-1234 또는 NUR-5678 형식"
+                className={`input-field ${errors.employeeId ? 'input-error' : ''}`}
+              />
+              {errors.employeeId && (
+                <p className="error-text">{errors.employeeId}</p>
+              )}
+            </div>
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="name"
-              label="이름"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              error={!!errors.name}
-              helperText={errors.name}
-            />
+            <div className="form-group">
+              <label htmlFor="name" className="required">이름</label>
+              <input
+                type="text"
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={`input-field ${errors.name ? 'input-error' : ''}`}
+              />
+              {errors.name && (
+                <p className="error-text">{errors.name}</p>
+              )}
+            </div>
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="password"
-              type="password"
-              label="비밀번호"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={!!errors.password}
-              helperText={errors.password}
-            />
+            <div className="form-group">
+              <label htmlFor="password" className="required">비밀번호</label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`input-field ${errors.password ? 'input-error' : ''}`}
+              />
+              {errors.password && (
+                <p className="error-text">{errors.password}</p>
+              )}
+            </div>
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="confirmPassword"
-              type="password"
-              label="비밀번호 확인"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
-            />
+            <div className="form-group">
+              <label htmlFor="confirmPassword" className="required">비밀번호 확인</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`input-field ${errors.confirmPassword ? 'input-error' : ''}`}
+              />
+              {errors.confirmPassword && (
+                <p className="error-text">{errors.confirmPassword}</p>
+              )}
+            </div>
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              회원가입
-            </Button>
+            <button type="submit" className="auth-submit-button">회원가입</button>
 
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="body2">
-                이미 계정이 있으신가요? <Link to="/login">로그인</Link>
-              </Typography>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+            <div className="auth-links">
+              <span>이미 계정이 있으신가요?</span>
+              <Link to="/login" className="login-link">로그인</Link>
+            </div>
+          </form>
+        </div>
+      </main>
+
+      <footer className="auth-footer">
+        <p>&copy; 2025 StrokeCare+ All Rights Reserved.</p>
+      </footer>
+    </div>
   );
 };
 

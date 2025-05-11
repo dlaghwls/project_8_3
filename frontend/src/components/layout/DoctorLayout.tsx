@@ -1,115 +1,155 @@
-import React, { useState } from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useRef } from 'react';
+import { Outlet, useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
-  AppBar, Toolbar, Typography, IconButton, Drawer, List,
-  ListItemButton, ListItemIcon, ListItemText, Box, Badge, Avatar,
-  Menu, MenuItem, Divider, Container, CssBaseline
+  Toolbar, Typography, Box, Button, CssBaseline, Container
 } from '@mui/material';
-import {
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  Person as PersonIcon,
-  Message as MessageIcon,
-  Notifications as NotificationsIcon,
-  ExitToApp as LogoutIcon
-} from '@mui/icons-material';
+import { ExitToApp as LogoutIcon } from '@mui/icons-material';
 import { useAuth } from '../../store/AuthContext';
 
-const DoctorLayout = () => {
-  const { user, logout } = useAuth();
+const navItems = [
+  { label: '대시보드', path: '/doctor/dashboard' },
+  { label: '메시지', path: '/doctor/messages' }
+];
+
+const DoctorLayout: React.FC = () => {
+  const { logout } = useAuth();
   const navigate = useNavigate();
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const [hovered, setHovered] = useState<string | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const drawerItems = [
-    { text: '대시보드', icon: <DashboardIcon />, path: '/doctor' },
- // { text: '환자 관리', icon: <PersonIcon />, path: '/doctor/patients' },
-    { text: '메시지', icon: <MessageIcon />, path: '/doctor/messages' },
-  ];
+  const handleMouseEnter = (label: string) => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    setHovered(label);
+  };
+
+  const handleMouseLeave = () => {
+    closeTimerRef.current = setTimeout(() => {
+      setHovered(null);
+    }, 300);
+  };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        minHeight: '100vh',
+        overflowX: 'hidden',
+        width: '100vw',
+        justifyContent: 'flex-start',
+        position: 'relative',
+      }}
+    >
       <CssBaseline />
-      <AppBar position="fixed">
-        <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={() => setDrawerOpen(!drawerOpen)}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            StrokeCare+ 의사 대시보드
-          </Typography>
-          <IconButton color="inherit">
-            <Badge badgeContent={4} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-          <IconButton onClick={handleProfileMenuOpen} color="inherit">
-            <Avatar sx={{ width: 32, height: 32, ml: 1 }}>
-              {user?.name?.charAt(0) || 'D'}
-            </Avatar>
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={() => navigate('/doctor/profile')}>
-              <Typography>{user?.name} (의사)</Typography>
-            </MenuItem>
-            <MenuItem onClick={() => navigate('/doctor/settings')}>설정</MenuItem>
-            <Divider />
-            <MenuItem onClick={handleLogout}>로그아웃</MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-      <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
-        <Box sx={{ width: 250 }} role="presentation">
-          <List>
-            {drawerItems.map((item) => (
-              <ListItemButton
-                key={item.text}
-                component={Link}
+
+      {/* 배경 이미지만 흐리게 처리 */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          minHeight: '100vh',
+          overflowX: 'hidden',
+          width: '100vw',
+          justifyContent: 'flex-start',
+          position: 'absolute',
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'center',
+          filter: 'blur(5px)', // 배경 이미지에 블러 효과 적용
+        }}
+      />
+
+      {/* 상단 Toolbar */}
+      <Toolbar
+        sx={{
+          py: 2,
+          width: '100%',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 1200,
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(10px)', // 상단바 배경 흐림 효과
+        }}
+      >
+        <Typography
+          component={RouterLink}
+          to="/doctor"
+          variant="h6"
+          sx={{
+            textDecoration: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            '&:hover': { color: 'inherit' }
+          }}
+        >
+          Doctor StrokeCare+
+        </Typography>
+
+        <Box sx={{ display: 'flex', ml: 6, gap: 4 }}>
+          {navItems.map(item => (
+            <Box
+              key={item.label}
+              sx={{ position: 'relative' }}
+              onMouseEnter={() => handleMouseEnter(item.label)}
+              onMouseLeave={handleMouseLeave}
+            >
+              <Typography
+                component={RouterLink}
                 to={item.path}
-                onClick={() => setDrawerOpen(false)}
+                variant="body1"
+                sx={{
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  px: 1,
+                  py: 0.5,
+                  borderBottom: hovered === item.label ? '2px solid #1976d2' : 'none',
+                  '&:hover': { color: '#1976d2' }
+                }}
               >
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText primary={item.text} />
-              </ListItemButton>
-            ))}
-          </List>
-          <Divider />
-          <List>
-            <ListItemButton onClick={handleLogout}>
-              <ListItemIcon><LogoutIcon /></ListItemIcon>
-              <ListItemText primary="로그아웃" />
-            </ListItemButton>
-          </List>
+                {item.label}
+              </Typography>
+            </Box>
+          ))}
         </Box>
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, pt: 8, px: 2 }}>
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+
+        <Box sx={{ ml: 'auto' }}>
+          <Button
+            color="inherit"
+            size="small"
+            startIcon={<LogoutIcon fontSize="small" />}
+            sx={{ textTransform: 'none', fontSize: '0.875rem' }}
+            onClick={handleLogout}
+          >
+            로그아웃
+          </Button>
+        </Box>
+      </Toolbar>
+
+      {/* 본문 영역 */}
+      <Container
+        maxWidth="lg"
+        sx={{
+          mt: 10,
+          mb: 4,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          flexGrow: 1,
+          zIndex: 1,
+        }}
+      >
+        <Box sx={{ width: '100%', maxWidth: 'lg' }}>
           <Outlet />
-        </Container>
-      </Box>
+        </Box>
+      </Container>
     </Box>
   );
 };
