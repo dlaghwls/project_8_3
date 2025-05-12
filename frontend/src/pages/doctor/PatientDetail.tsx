@@ -36,6 +36,7 @@ interface CTScan {
   id: number;
   dicom_file: string;
   uploaded_at: string;
+  preview_url: string;  
 }
 
 interface VitalSign {
@@ -162,7 +163,7 @@ const PatientDetail = () => {
             <Box sx={{ height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
-                  data={patient.vitals.map((v) => ({
+                  data={(patient.vitals ?? []).map(v => ({
                     timestamp: new Date(v.measured_at).toLocaleString('ko-KR'),
                     sbp: v.systolic_bp,
                     dbp: v.diastolic_bp,
@@ -189,7 +190,7 @@ const PatientDetail = () => {
           <Card>
             <CardHeader title="최신 Vital Signs" />
             <CardContent>
-              {patient.vitals.length > 0 ? (
+             {(patient.vitals ?? []).length > 0 ? (
                 <List>
                   <ListItem>
                     <ListItemText
@@ -289,59 +290,117 @@ const PatientDetail = () => {
 
         {/* CT 스캔 목록 */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              CT 스캔 목록
-            </Typography>
-            {ctScans.length > 0 ? (
-              <List>
-                {ctScans.map((scan) => (
-                  <ListItem
-                    key={scan.id}
-                    secondaryAction={
-                      <>
-                        <Button
-                          component="a"
-                          href={scan.dicom_file}
-                          target="_blank"
-                          variant="outlined"
-                          size="small"
-                        >
-                          보기
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          sx={{ ml: 1 }}
-                          onClick={() => {
-                            setOrigUrl(scan.dicom_file);
-                            setSegmentUrl(null);
-                            setModalOpen(true);
-                            api
-                              .post<{ segmented_url: string }>(
-                                `/patients/${id}/ct_scans/${scan.id}/segment/`
-                              )
-                              .then((r) => setSegmentUrl(r.data.segmented_url))
-                              .catch(() => setSegmentUrl(null));
-                          }}
-                        >
-                          분할
-                        </Button>
-                      </>
-                    }
-                  >
-                    <ListItemText
-                      primary={`Scan #${scan.id}`}
-                      secondary={new Date(scan.uploaded_at).toLocaleString('ko-KR')}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Typography color="text.secondary">등록된 CT 스캔이 없습니다.</Typography>
-            )}
-          </Paper>
-        </Grid>
+  <Paper sx={{ p: 2 }}>
+    <Typography variant="h6" gutterBottom>
+      CT 스캔 목록
+    </Typography>
+
+    {ctScans.length > 0 ? (
+      <List>
+        {ctScans.map((scan) => (
+          <ListItem key={scan.id} sx={{ alignItems: 'flex-start' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+              
+              {/* ─── 썸네일 영역 ──────────────────── */}
+              {scan.preview_url ? (
+                <img
+                  src={
+                    scan.preview_url.startsWith('http')
+                      ? scan.preview_url
+                      : `${BACKEND}${scan.preview_url}`
+                  }
+                  alt="CT preview"
+                  style={{
+                    width: 120,
+                    height: 120,
+                    objectFit: 'contain',
+                    borderRadius: 4,
+                    background: '#000',
+                  }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    width: 120,
+                    height: 120,
+                    bgcolor: '#f0f0f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 1,
+                  }}
+                >
+                  <Typography variant="caption" color="text.secondary">
+                    미리보기 없음
+                  </Typography>
+                </Box>
+              )}
+              {/* ──────────────────────────────── */}
+
+              <Box sx={{ flexGrow: 1 }}>
+                <ListItemText
+                  primary={`Scan #${scan.id}`}
+                  secondary={new Date(scan.uploaded_at).toLocaleString('ko-KR')}
+                />
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  component="a"
+                  href={
+                    scan.preview_url?.startsWith('http')
+                      ? scan.preview_url
+                      : `${BACKEND}${scan.preview_url}`
+                  }
+                  target="_blank"
+                  variant="outlined"
+                  size="small"
+                >
+                  보기
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => {
+                    setOrigUrl(
+                      scan.preview_url?.startsWith('http')
+                        ? scan.preview_url
+                        : `${BACKEND}${scan.preview_url}`
+                    );
+                    setSegmentUrl(null);
+                    setModalOpen(true);
+                    api
+                      .post<{ segmented_url: string }>(
+                        `/patients/${id}/ct_scans/${scan.id}/segment/`
+                      )
+                      .then((r) => setSegmentUrl(r.data.segmented_url))
+                      .catch(() => setSegmentUrl(null));
+                  }}
+                >
+                  분할
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  onClick={() => {
+      // 일단 임시로 메인 Viewer 열기 (UID 필요 시 여기 수정)
+                    const viewerUrl = 'http://34.170.61.238:3000/viewer';
+                    window.open(viewerUrl, '_blank');
+                  }}
+                >
+                  OHIF 뷰어
+                </Button>
+              </Box>
+            </Box>
+          </ListItem>
+        ))}
+      </List>
+    ) : (
+      <Typography color="text.secondary">등록된 CT 스캔이 없습니다.</Typography>
+    )}
+  </Paper>
+</Grid>
 
         {/* 코멘트 */}
         <Grid item xs={12}>
@@ -388,38 +447,52 @@ const PatientDetail = () => {
       {/* 세그멘테이션 결과 모달 */}
       {/* Segmentation 결과 모달 */}
       <Dialog open={modalOpen} onClose={() => setModalOpen(false)} maxWidth="lg" fullWidth>
-        <DialogTitle>Segmentation 결과</DialogTitle>
-        <DialogContent dividers>
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography>원본</Typography>
-              {/* 2. 여기를 아래 코드로 교체 */}
-              {origUrl && (
-                <img
-                  src={origUrl.startsWith("http") ? origUrl : `${BACKEND}${origUrl}`}
-                  alt="원본 CT"
-                  style={{ maxWidth: '400px' }}
-                />
-              )}
-            </Box>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography>분할 결과</Typography>
-              {segmentUrl ? (
-                <img
-                  src={segmentUrl!.startsWith("http") ? segmentUrl! : `${BACKEND}${segmentUrl!}`}
-                  alt="분할 결과"
-                  style={{ maxWidth: '400px' }}
-                />
-              ) : (
-                <Typography color="error">로딩 중이거나 실패했습니다.</Typography>
-              )}
-            </Box>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setModalOpen(false)}>닫기</Button>
-        </DialogActions>
-      </Dialog>
+  <DialogTitle>Segmentation 결과</DialogTitle>
+  <DialogContent dividers>
+    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+      {/* ── 원본 ── */}
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography>원본</Typography>
+        {origUrl && (
+          <img
+            src={origUrl.startsWith("http") ? origUrl : `${BACKEND}${origUrl}`}
+            alt="원본 CT"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              height: 'auto',
+              objectFit: 'contain',
+              backgroundColor: '#000'
+            }}
+          />
+        )}
+      </Box>
+
+      {/* ── 분할 결과 ── */}
+      <Box sx={{ textAlign: 'center' }}>
+        <Typography>분할 결과</Typography>
+        {segmentUrl ? (
+          <img
+            src={segmentUrl.startsWith("http") ? segmentUrl : `${BACKEND}${segmentUrl}`}
+            alt="분할 결과"
+            style={{
+              width: '100%',
+              maxWidth: '400px',
+              height: 'auto',
+              objectFit: 'contain'
+            }}
+          />
+        ) : (
+          <Typography color="error">로딩 중이거나 실패했습니다.</Typography>
+        )}
+      </Box>
+    </Box>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setModalOpen(false)}>닫기</Button>
+  </DialogActions>
+</Dialog>
+
     </Container>
   );
 };
